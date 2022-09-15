@@ -6,7 +6,7 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/management-platform/management-platform/pom.xml" />
-        <option value="$PROJECT_DIR$/mgmt/rtmk-mgmt/pom.xml" />
+        <option value="$PROJECT_DIR$/realtime-marketing-manager/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

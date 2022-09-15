@@ -1,6 +1,6 @@
-package cn.doitedu.rtmk.controller;
+package cn.doitedu.rtmk.realtimemarketingmanager.controller;
 
-import cn.doitedu.rtmk.pojo.Person;
+import cn.doitedu.rtmk.realtimemarketingmanager.pojo.Person;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

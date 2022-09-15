@@ -9,18 +9,20 @@
         <outputRelativeToContentRoot value="true" />
         <module name="rtdw" />
         <module name="data-exporter" />
-        <module name="rtmk-mgmt" />
         <module name="management-platform" />
+        <module name="realtime-marketing-manager" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="management-platform" target="1.8" />
       <module name="rtmk-management-platform" target="1.8" />
+      <module name="rtmk-mgmt" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="management-platform" options="-parameters" />
+      <module name="realtime-marketing-manager" options="-parameters" />
       <module name="rtmk-mgmt" options="-parameters" />
     </option>
   </component>

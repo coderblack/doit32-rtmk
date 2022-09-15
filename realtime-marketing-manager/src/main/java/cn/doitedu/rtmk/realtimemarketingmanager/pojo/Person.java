@@ -1,4 +1,4 @@
-package cn.doitedu.rtmk.pojo;
+package cn.doitedu.rtmk.realtimemarketingmanager.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

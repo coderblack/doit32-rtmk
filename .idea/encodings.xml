@@ -3,5 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/management-platform/management-platform/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mgmt/rtmk-mgmt/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/realtime-marketing-manager/src/main/java" charset="UTF-8" />
   </component>
 </project>

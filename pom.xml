@@ -11,6 +11,7 @@
     <modules>
         <module>data-exporter</module>
         <module>rtdw</module>
+        <module>realtime-marketing-manager</module>
     </modules>
 
     <properties>
