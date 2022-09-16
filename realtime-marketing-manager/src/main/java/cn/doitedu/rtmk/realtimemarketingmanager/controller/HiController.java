@@ -15,9 +15,6 @@ public class HiController {
 
     @RequestMapping("/hello")
     public String hello(String name){
-
-
-        log.info("------------");
         return "hello " + name;
     }
 

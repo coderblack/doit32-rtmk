@@ -94,8 +94,6 @@
             <systemPath>${project.basedir}/../xlib/flink-doris-connector-1.14-1.0.0-SNAPSHOT.jar</systemPath>
         </dependency>
 
-
-
     </dependencies>
 
 </project>
