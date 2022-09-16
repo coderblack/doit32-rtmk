@@ -4,7 +4,7 @@
     <profile name="Maven 1" modules="data-exporter">
       <parameters>
         <parameter value="-dependencyfile" />
-        <parameter value="D:\IdeaProjects\doit32-rtmk\data-exporter\target/.scala_dependencies" />
+        <parameter value="D:\dev_works\doit32-rtmk\data-exporter\target/.scala_dependencies" />
       </parameters>
     </profile>
   </component>

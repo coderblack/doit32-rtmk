@@ -1,11 +1,13 @@
 package cn.doitedu.rtmk.realtimemarketingmanager.controller;
 
 import cn.doitedu.rtmk.realtimemarketingmanager.pojo.Person;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Random;
 
+@Slf4j
 @RestController
 public class HiController {
     Random random = new Random();
@@ -15,6 +17,7 @@ public class HiController {
     public String hello(String name){
 
 
+        log.info("------------");
         return "hello " + name;
     }
 
