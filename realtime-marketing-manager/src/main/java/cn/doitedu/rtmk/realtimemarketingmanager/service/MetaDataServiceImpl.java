@@ -74,6 +74,14 @@ public class MetaDataServiceImpl implements MetaDataService {
 
 
     @Override
+    public String getRuleModelCalculatorCodeTemplate(int ruleModelId) throws SQLException {
+       return metaDataDao.findModelCalculatorCodeTemplateByModelId(ruleModelId);
+    }
+
+
+
+
+    @Override
     public void addRuleResources(RoaringBitmap staticProfileBitmap, JSONObject ruleParamJsonObject, String groovyCode) throws Exception {
         metaDataDao.insertRuleResourceToMysql(staticProfileBitmap,ruleParamJsonObject,groovyCode);
     }

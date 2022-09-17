@@ -2,7 +2,7 @@
   "ruleModelId": 1,
   "ruleId": "rule001",
   "trigger": {
-    "eventId": "e1",
+    "eventId": "e5",
     "attributeParams": [
       {
         "attributeName": "pageId",

@@ -1,0 +1,99 @@
+package cn.doitedu.rtmk.engine.caculator
+
+import cn.doitedu.rtmk.common.interfaces.RuleCalculator
+import cn.doitedu.rtmk.common.pojo.UserEvent
+import cn.doitedu.rtmk.common.utils.UserEventComparator
+import com.alibaba.fastjson.JSONArray
+import com.alibaba.fastjson.JSONObject
+import org.roaringbitmap.RoaringBitmap
+import redis.clients.jedis.Jedis
+
+class RuleMode01Calculator implements RuleCalculator {
+    RoaringBitmap staticProfileUserBitmap;
+    JSONObject ruleDefineParamJsonObject;
+    Jedis jedis;
+
+
+    @Override
+    void init(JSONObject ruleDefineParamJsonObject, RoaringBitmap staticProfileUserBitmap) {
+        this.ruleDefineParamJsonObject = ruleDefineParamJsonObject
+        this.staticProfileUserBitmap = staticProfileUserBitmap
+        this.jedis = new Jedis("doitedu", 6379)
+    }
+
+    /**
+     * 规则运算机的功能入口方法
+     * @param userEvent 输入的用户行为事件
+     * @return
+     */
+    @Override
+    List<JSONObject> process(UserEvent userEvent) {
+        if (staticProfileUserBitmap.contains(userEvent.getGuid())) {
+
+            // 从规则参数中取出触发事件条件
+            JSONObject triggerParamObject = ruleDefineParamJsonObject.getJSONObject("trigger")
+
+            // 判断用户行为是否是触发事件，如果是则调用规则匹配逻辑进行匹配判断
+            if (UserEventComparator.userEventIsEqualParam(userEvent, triggerParamObject)) {
+                boolean isMatch = isMatch(userEvent.getGuid())
+
+                if (isMatch) {
+                    JSONObject resultJsonObject = new JSONObject()
+                    resultJsonObject.put("guid", userEvent.getGuid())
+                    resultJsonObject.put("matchTime", userEvent.getEventTime())
+                    resultJsonObject.put("matchRule", ruleDefineParamJsonObject.getString("ruleId"))
+
+                    return Collections.singletonList(resultJsonObject)
+                }
+            }
+            // 如果不是触发事件，则调用运算逻辑进行动态画像运算
+            else {
+                calc(userEvent)
+            }
+        }
+
+        return null
+    }
+
+    @Override
+    void calc(UserEvent userEvent) {
+
+        String ruleId = ruleDefineParamJsonObject.getString("ruleId")
+
+        JSONObject actionCountParam = ruleDefineParamJsonObject.getJSONObject("actionCountCondition")
+        JSONArray eventParams = actionCountParam.getJSONArray("eventParams")
+
+        // 判断 用户的行为事件，是否满足某条件参数
+        for (int i = 0; i < eventParams.size(); i++) {
+            JSONObject eventParam = eventParams.getJSONObject(i)
+            String conditionId = eventParam.getString("conditionId")
+            // 如果用户行为与参数条件吻合
+            if (UserEventComparator.userEventIsEqualParam(userEvent, eventParam)) {
+                // 则去更新redis中的聚合状态
+                jedis.hincrBy(ruleId + ":" + conditionId, userEvent.getGuid() + "", 1)
+            }
+        }
+    }
+
+    @Override
+    boolean isMatch(int guid) {
+        String ruleId = ruleDefineParamJsonObject.getString("ruleId")
+
+        JSONObject actionCountParam = ruleDefineParamJsonObject.getJSONObject("actionCountCondition")
+        JSONArray eventParams = actionCountParam.getJSONArray("eventParams")
+
+        // 遍历每一个事件次数画像条件，看用户的实际值是否满足阈值
+      #for(eventParam:eventParamList)
+        JSONObject eventParam#(for.index) = eventParams.getJSONObject(#(for.index))
+        String conditionId#(for.index) = eventParam#(for.index).getString("conditionId")
+        // 获取条件参数所要求的的阈值
+        int paramValue#(for.index) = eventParam#(for.index).getInteger("eventCount")
+        // 去redis中获取该条件的实际值
+        String realValueStr#(for.index) = jedis.hget(ruleId + ":" + conditionId#(for.index), guid + "")
+        int realValue#(for.index) = realValueStr#(for.index)==null ? 0 : Integer.parseInt(realValueStr#(for.index))
+        boolean res#(for.index) = realValue#(for.index) >= paramValue#(for.index)
+      #end
+
+        return #(combineExpr)
+    }
+}

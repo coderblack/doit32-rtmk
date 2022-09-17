@@ -8,8 +8,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="rtdw" />
-        <module name="data-exporter" />
+        <module name="realtime-marketing-engine" />
         <module name="management-platform" />
+        <module name="realtime-marketing-common" />
+        <module name="realtime-marketing-resource" />
+        <module name="data-exporter" />
         <module name="realtime-marketing-manager" />
       </profile>
     </annotationProcessing>

@@ -5,7 +5,7 @@ import org.roaringbitmap.RoaringBitmap;
 
 import java.io.IOException;
 
-public interface ProfileQueryService {
+public interface EsProfileQueryService {
 
     RoaringBitmap findUsersByProfileTags(JSONArray profileConditions) throws IOException;
 }

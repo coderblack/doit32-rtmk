@@ -6,16 +6,16 @@ import org.springframework.stereotype.Repository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.sql.*;
 
 @Repository
 public class MetaDataDaoImpl {
     PreparedStatement preparedStatement;
     PreparedStatement preparedStatement2;
+    Connection conn;
 
     public MetaDataDaoImpl() throws Exception {
-        Connection conn = DriverManager.getConnection("jdbc:mysql://doitedu:3306/doit32", "root", "root");
+        conn = DriverManager.getConnection("jdbc:mysql://doitedu:3306/doit32", "root", "root");
 
         // 用于获取动态画像条件（事件次数条件）的sql模板的语句
         preparedStatement = conn.prepareStatement("select  sql_template  from rule_model_sql_templates where rule_model_id = ? and query_id = ?");
@@ -44,8 +44,8 @@ public class MetaDataDaoImpl {
 
     /**
      * 插入新增规则的所有引擎需要用的资源到元数据库
-     * @param staticProfileBitmap
-     * @param groovyCode
+     * @param staticProfileBitmap 静态画像条件圈选人群bitmap
+     * @param groovyCode 规则运算机groovy代码
      */
     public void insertRuleResourceToMysql(RoaringBitmap staticProfileBitmap, JSONObject ruleParamJsonObject, String groovyCode) throws Exception {
 
@@ -65,5 +65,16 @@ public class MetaDataDaoImpl {
         // 执行插入语句
         preparedStatement2.execute();
 
+    }
+
+    public String findModelCalculatorCodeTemplateByModelId(int ruleModelId) throws SQLException {
+
+        PreparedStatement pstmt = conn.prepareStatement("select calculator_code_template from caculator_template where rule_model_id = ?");
+        pstmt.setInt(1,ruleModelId);
+
+        ResultSet rs = pstmt.executeQuery();
+        rs.next();
+
+        return rs.getString("calculator_code_template");
     }
 }

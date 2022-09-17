@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
-public class EsProfileQueryServiceImpl implements ProfileQueryService {
+public class EsProfileQueryServiceImpl implements EsProfileQueryService {
 
 
     private EsQueryDaoImpl esQueryDao;
