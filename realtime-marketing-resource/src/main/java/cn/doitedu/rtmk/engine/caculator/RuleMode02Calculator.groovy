@@ -6,41 +6,28 @@ import cn.doitedu.rtmk.common.utils.UserEventComparator
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import groovy.util.logging.Slf4j
-import org.apache.flink.api.common.state.ListState
 import org.roaringbitmap.RoaringBitmap
 import redis.clients.jedis.Jedis
 
 @Slf4j
-class RuleMode01Calculator implements RuleCalculator {
+class RuleMode02Calculator implements RuleCalculator {
     RoaringBitmap staticProfileUserBitmap;
     JSONObject ruleDefineParamJsonObject;
     Jedis jedis;
-    boolean isNew = true;
+
 
     @Override
     void init(JSONObject ruleDefineParamJsonObject, RoaringBitmap staticProfileUserBitmap) {
         this.ruleDefineParamJsonObject = ruleDefineParamJsonObject
         this.staticProfileUserBitmap = staticProfileUserBitmap
         this.jedis = new Jedis("doitedu", 6379)
-
-    }
-
-    @Override
-    List<JSONObject> batchProcess(ListState<UserEvent> userEventList) {
-        return null
     }
 
     @Override
     List<JSONObject> batchProcess(List<UserEvent> userEventList) {
-        List<JSONObject> resultList = new ArrayList<JSONObject>()
-        for (UserEvent userEvent :  userEventList ) {
-            resultList.addAll(process( userEvent ))
-        }
-        return resultList
+        return null
     }
-
-
-    /**
+/**
      * 规则运算机的功能入口方法
      * @param userEvent 输入的用户行为事件
      * @return
@@ -81,6 +68,7 @@ class RuleMode01Calculator implements RuleCalculator {
 
         println("进入计算方法")
         String ruleId = ruleDefineParamJsonObject.getString("ruleId")
+        int guid = userEvent.getGuid()
 
         JSONObject actionCountParam = ruleDefineParamJsonObject.getJSONObject("actionCountCondition")
         JSONArray eventParams = actionCountParam.getJSONArray("eventParams")
@@ -96,7 +84,32 @@ class RuleMode01Calculator implements RuleCalculator {
             if (UserEventComparator.userEventIsEqualParam(userEvent, eventParam)) {
                 println("判断结果为吻合")
                 // 则去更新redis中的聚合状态
-                jedis.hincrBy(ruleId + ":" + conditionId, userEvent.getGuid() + "", 1)
+                jedis.hincrBy(ruleId + ":" + conditionId, guid + "", 1)
+            }
+        }
+
+
+        /**
+         * 对行为序列类的画像逻辑进行计算
+         */
+        JSONObject actionSeqParam = ruleDefineParamJsonObject.getJSONObject("actionSeqCondition")
+        String seqConditionId = actionSeqParam.getString("conditionId")
+        JSONArray seqEventParams = actionSeqParam.getJSONArray("eventParams")  // E1 ,  E3  ,  E6
+
+        // 取到该用户当前的 完成 步骤号
+        String stepNoStr = jedis.hget(ruleId+":"+seqConditionId+":step",guid+"")
+        int stepNo = stepNoStr == null ? 0 : Integer.parseInt(stepNoStr)  // 1
+
+        // 判断本次输入事件，是否是 目标步骤事件
+        if(UserEventComparator.userEventIsEqualParam(userEvent,seqEventParams.getJSONObject(stepNo))){
+            if(stepNo==seqEventParams.size()-1){
+                // 将用户的完成步骤号归零，并且将他的 完整实现次数计数+1
+                jedis.hset(ruleId + ":" + seqConditionId + ":step", guid + "", 0)
+                jedis.hincrBy(ruleId + ":" + seqConditionId + ":cnt", guid + "", 1)
+
+            }else {
+                // 如是，则对 该用户的 完成步骤号 更新（或者更新  完整完成次数）
+                jedis.hincrBy(ruleId + ":" + seqConditionId + ":step", guid + "", 1)
             }
         }
     }
@@ -116,7 +129,7 @@ class RuleMode01Calculator implements RuleCalculator {
         // 去redis中获取该条件的实际值
         String realValueStr0 = jedis.hget(ruleId + ":" + conditionId0, guid + "")
         int realValue0 = realValueStr0==null ? 0 : Integer.parseInt(realValueStr0)
-        boolean res0 = realValue0 >= paramValue0
+        boolean res_cnt0 = realValue0 >= paramValue0
 
         JSONObject eventParam1 = eventParams.getJSONObject(1)
         String conditionId1 = eventParam1.getString("conditionId")
@@ -125,7 +138,7 @@ class RuleMode01Calculator implements RuleCalculator {
         // 去redis中获取该条件的实际值
         String realValueStr1 = jedis.hget(ruleId + ":" + conditionId1, guid + "")
         int realValue1 = realValueStr1==null ? 0 : Integer.parseInt(realValueStr1)
-        boolean res1 = realValue1 >= paramValue1
+        boolean res_cnt1 = realValue1 >= paramValue1
 
         JSONObject eventParam2 = eventParams.getJSONObject(2)
         String conditionId2 = eventParam2.getString("conditionId")
@@ -134,9 +147,26 @@ class RuleMode01Calculator implements RuleCalculator {
         // 去redis中获取该条件的实际值
         String realValueStr2 = jedis.hget(ruleId + ":" + conditionId2, guid + "")
         int realValue2 = realValueStr2==null ? 0 : Integer.parseInt(realValueStr2)
-        boolean res2 = realValue2 >= paramValue2
+        boolean res_cnt2 = realValue2 >= paramValue2
 
-        return res0 && ( res1  || res2 )
+        /**
+         * 事件次数类条件的总结果
+         */
+        boolean res0 =  res_cnt0 && ( res_cnt1  || res_cnt2 )
+
+
+        /**
+         * 获取序列条件的结果
+         */
+        JSONObject actionSeqParam = ruleDefineParamJsonObject.getJSONObject("actionSeqCondition")
+        int seqCountParam = actionSeqParam.getInteger("seqCount")
+
+        String seqConditionId = actionSeqParam.getString("conditionId")
+        String seqCountReal = jedis.hget(ruleId + ":" + seqConditionId + ":cnt", guid + "")
+
+        boolean res1 = seqCountReal >= seqCountParam
+
+        return res0 && res1
     }
 
     @Override

@@ -11,4 +11,6 @@ public interface MetaDataService {
     String getRuleModelCalculatorCodeTemplate(int ruleModelId) throws SQLException;
 
     void addRuleResources(RoaringBitmap staticProfileBitmap, JSONObject ruleParamJsonObject, String groovyCode) throws Exception;
+
+    String getActionSeqQuerySql(JSONObject ruleParamJsonObject) throws SQLException;
 }

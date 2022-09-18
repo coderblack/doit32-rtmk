@@ -8,4 +8,6 @@ import java.sql.SQLException;
 public interface DynamicProfileQueryService {
 
     void initDynamicProfileActionCount(JSONObject ruleParamJsonObject, String querySql, RoaringBitmap staticProfileUsers) throws SQLException;
+
+    void initDynamicProfileActionSeq(JSONObject ruleParamJsonObject, String actionSeqQuerySql, RoaringBitmap profileBitmap);
 }

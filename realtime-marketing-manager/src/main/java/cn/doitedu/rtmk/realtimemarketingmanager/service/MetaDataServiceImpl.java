@@ -86,6 +86,50 @@ public class MetaDataServiceImpl implements MetaDataService {
         metaDataDao.insertRuleResourceToMysql(staticProfileBitmap,ruleParamJsonObject,groovyCode);
     }
 
+    @Override
+    public String getActionSeqQuerySql(JSONObject ruleParamJsonObject) throws SQLException {
+
+        JSONObject actionSeqCondition = ruleParamJsonObject.getJSONObject("actionSeqCondition");
+        JSONArray eventParams = actionSeqCondition.getJSONArray("eventParams");
+
+        // 解析规则的json参数，封装到自定义的数据bean中
+        ArrayList<ActionCountParam> actionSeqParamList = new ArrayList<>();
+        for(int i=0;i<eventParams.size();i++){
+            JSONObject eventParam = eventParams.getJSONObject(i);
+            String eventId = eventParam.getString("eventId");
+            JSONArray attributeParams = eventParam.getJSONArray("attributeParams");
+
+            ArrayList<AttributeParam> attributeParamList = new ArrayList<>();
+            for(int j=0;j<attributeParams.size();j++) {
+                JSONObject attributeParam = attributeParams.getJSONObject(j);
+                String attributeName = attributeParam.getString("attributeName");
+                String compareType = attributeParam.getString("compareType");
+                String compareValue = attributeParam.getString("compareValue");
+
+                AttributeParam atp = new AttributeParam(attributeName, compareType, compareValue);
+                attributeParamList.add(atp);
+            }
+
+            ActionCountParam actionCountParam = new ActionCountParam(eventId, null, null, attributeParamList);
+            actionSeqParamList.add(actionCountParam);
+
+        }
+
+        // 将数据bean，放入一个hashmap中，用于渲染sql
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("actionSeqParamList",actionSeqParamList);
+        data.put("windowStart",actionSeqCondition.getString("windowStart"));
+        data.put("windowEnd",actionSeqCondition.getString("windowEnd"));
+
+
+        // 取查询sql模板
+        String sqlTemplateStr = metaDataDao.getActionCountParamQueryTemplate(ruleParamJsonObject.getInteger("ruleModelId"), "action_seq");
+        Template template = engine.getTemplateByString(sqlTemplateStr);
+        String sql = template.renderToString(data);
+
+        return sql;
+
+    }
 
 
 }

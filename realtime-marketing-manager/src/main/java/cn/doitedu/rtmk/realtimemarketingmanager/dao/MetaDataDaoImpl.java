@@ -21,7 +21,7 @@ public class MetaDataDaoImpl {
         preparedStatement = conn.prepareStatement("select  sql_template  from rule_model_sql_templates where rule_model_id = ? and query_id = ?");
 
         // 用于插入规则资源的语句
-        preparedStatement2 = conn.prepareStatement("insert into rule_engine_resource (rule_model_id,rule_id,static_bitmap,rule_param_json,groovy_code) values (?,?,?,?,?)");
+        preparedStatement2 = conn.prepareStatement("insert into rule_engine_resource (rule_model_id,rule_id,static_bitmap,rule_param_json,groovy_code,status) values (?,?,?,?,?,?)");
 
     }
 
@@ -61,6 +61,7 @@ public class MetaDataDaoImpl {
         preparedStatement2.setBytes(3,bytes);
         preparedStatement2.setString(4,ruleParamJsonObject.toJSONString());
         preparedStatement2.setString(5,groovyCode);
+        preparedStatement2.setInt(6,1);
 
         // 执行插入语句
         preparedStatement2.execute();

@@ -1,0 +1,129 @@
+{
+  "ruleModelId": "2",
+  "ruleId": "m2-r01",
+  "ruleTrigEvent": {
+    "eventId": "e5",
+    "attributeParams": [
+      {
+        "attributeName": "pageId",
+        "compareType": "=",
+        "compareValue": "page001"
+      }
+    ],
+    "windowStart": "2022-08-01 12:00:00",
+    "windowEnd": "2022-08-30 12:00:00"
+  },
+  "profileCondition": [
+    {
+      "tagId": "tg01",
+      "compareType": "gt",
+      "compareValue": "2"
+    },
+    {
+      "tagId": "tg04",
+      "compareType": "match",
+      "compareValue": "汽车"
+    }
+  ],
+  "actionCountCondition": {
+    "eventParams": [
+      {
+        "eventId": "e1",
+        "attributeParams": [
+          {
+            "attributeName": "pageId",
+            "compareType": "=",
+            "compareValue": "page001"
+          }
+        ],
+        "windowStart": "2022-08-01 12:00:00",
+        "windowEnd": "2022-08-30 12:00:00",
+        "eventCount": 3,
+        "conditionId": 1,
+        "dorisQueryTemplate": "action_count"
+      },
+      {
+        "eventId": "e3",
+        "attributeParams": [
+          {
+            "attributeName": "pageId",
+            "compareType": "=",
+            "compareValue": "page002"
+          },
+          {
+            "attributeName": "itemId",
+            "compareType": "=",
+            "compareValue": "item003"
+          }
+        ],
+        "windowStart": "2022-08-01 12:00:00",
+        "windowEnd": "2022-08-30 12:00:00",
+        "eventCount": 1,
+        "conditionId": 2,
+        "dorisQueryTemplate": "action_count"
+      },
+      {
+        "eventId": "e2",
+        "attributeParams": [
+          {
+            "attributeName": "pageId",
+            "compareType": "=",
+            "compareValue": "page001"
+          }
+        ],
+        "windowStart": "2022-08-01 12:00:00",
+        "windowEnd": "2022-08-30 12:00:00",
+        "eventCount": 2,
+        "conditionId": 3,
+        "dorisQueryTemplate": "action_count"
+      }
+    ],
+    "combineExpr": " res_0 && res_1 && res_2 "
+  },
+  "actionSeqCondition": {
+    "eventParams": [
+      {
+        "eventId": "e1",
+        "attributeParams": [
+          {
+            "attributeName": "pageId",
+            "compareType": "=",
+            "compareValue": "page001"
+          }
+        ]
+      },
+      {
+        "eventId": "e3",
+        "attributeParams": [
+          {
+            "attributeName": "pageId",
+            "compareType": "=",
+            "compareValue": "page002"
+          },
+          {
+            "attributeName": "itemId",
+            "compareType": "=",
+            "compareValue": "item003"
+          }
+        ]
+      },
+      {
+        "eventId": "e2",
+        "attributeParams": [
+          {
+            "attributeName": "pageId",
+            "compareType": "=",
+            "compareValue": "page001"
+          }
+        ]
+      }
+    ],
+    "windowStart": "2022-08-01 12:00:00",
+    "windowEnd": "2022-08-30 12:00:00",
+    "conditionId": 4,
+    "dorisQueryTemplate": "action_seq",
+    "seqCount": 2
+  },
+  "rule_match_count": 2 ,
+  "combineExpr" : "res_0 && res_1"
+}

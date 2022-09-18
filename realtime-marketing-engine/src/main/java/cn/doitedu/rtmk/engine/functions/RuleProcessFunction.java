@@ -8,9 +8,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import groovy.lang.GroovyClassLoader;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.state.BroadcastState;
-import org.apache.flink.api.common.state.MapStateDescriptor;
-import org.apache.flink.api.common.state.ReadOnlyBroadcastState;
+import org.apache.flink.api.common.state.*;
+import org.apache.flink.api.common.time.Time;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction;
 import org.apache.flink.util.Collector;
@@ -22,14 +21,25 @@ import java.util.Map;
 public class RuleProcessFunction extends KeyedBroadcastProcessFunction<Integer, UserEvent, RuleMetaBean, JSONObject> {
 
     GroovyClassLoader groovyClassLoader;
+    ListState<UserEvent> eventListState;
 
     @Override
     public void open(Configuration parameters) throws Exception {
         groovyClassLoader = new GroovyClassLoader();
+
+
+        // 用于存放用户实时的行为明细
+        StateTtlConfig ttlConfig = StateTtlConfig.newBuilder(Time.seconds(30)).build();
+        StateDescriptors.userEventsStateDesc.enableTimeToLive(ttlConfig);
+        eventListState = getRuntimeContext().getListState(StateDescriptors.userEventsStateDesc);
+
     }
 
     @Override
     public void processElement(UserEvent userEvent, KeyedBroadcastProcessFunction<Integer, UserEvent, RuleMetaBean, JSONObject>.ReadOnlyContext ctx, Collector<JSONObject> out) throws Exception {
+
+        // 先把行为事件放入事件明细状态
+        eventListState.add(userEvent);
 
         log.info("收到一条用户行为,事件id:{},pageId:{}",userEvent.getEventId(),userEvent.getProperties().get("pageId"));
         ReadOnlyBroadcastState<String, RuleMetaBean> broadcastState = ctx.getBroadcastState(StateDescriptors.ruleMetaBroadCastStateDesc);
@@ -39,6 +49,14 @@ public class RuleProcessFunction extends KeyedBroadcastProcessFunction<Integer, 
 
             RuleMetaBean ruleMetaBean = immutableEntry.getValue();
             RuleCalculator ruleCalculator = ruleMetaBean.getRuleCalculator();
+            // 判断本运算机是否第一次运行
+            if(ruleCalculator.getNew()){
+                List<JSONObject> jsonObjects = ruleCalculator.batchProcess(eventListState);
+                for (JSONObject jsonObject : jsonObjects) {
+                    out.collect(jsonObject);
+                }
+                ruleCalculator.setNew(false);
+            }
 
             List<JSONObject> resultList = ruleCalculator.process(userEvent);
             if(resultList != null){

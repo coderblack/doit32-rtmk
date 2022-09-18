@@ -24,4 +24,9 @@ public class DynamicProfileQueryServiceImpl implements DynamicProfileQueryServic
         dynamicProfileInitDao.initActionCountProfile(ruleParamJsonObject,querySql,staticProfileUsers);
     }
 
+    @Override
+    public void initDynamicProfileActionSeq(JSONObject ruleParamJsonObject, String actionSeqQuerySql, RoaringBitmap profileBitmap) {
+
+    }
+
 }

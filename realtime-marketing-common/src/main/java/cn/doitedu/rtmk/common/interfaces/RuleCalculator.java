@@ -2,6 +2,7 @@ package cn.doitedu.rtmk.common.interfaces;
 
 import cn.doitedu.rtmk.common.pojo.UserEvent;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.flink.api.common.state.ListState;
 import org.roaringbitmap.RoaringBitmap;
 
 import java.util.List;
@@ -23,6 +24,13 @@ public interface RuleCalculator {
      */
     void init(JSONObject ruleDefineParamJsonObject, RoaringBitmap profileUserBitmap);
 
+    /**
+     * 事件批 运算
+     * @param userEventList
+     * @return
+     */
+    List<JSONObject> batchProcess(ListState<UserEvent> userEventList);
+
 
     /**
      * 对输入事件进行规则处理的入口方法
@@ -43,4 +51,8 @@ public interface RuleCalculator {
      * @return  是否满足
      */
     boolean isMatch(int guid);
+
+    boolean getNew();
+    boolean setNew(boolean isNew);
+
 }
