@@ -31,6 +31,7 @@ public interface RuleCalculator {
      */
     List<JSONObject> batchProcess(ListState<UserEvent> userEventList);
 
+    //
 
     /**
      * 对输入事件进行规则处理的入口方法
